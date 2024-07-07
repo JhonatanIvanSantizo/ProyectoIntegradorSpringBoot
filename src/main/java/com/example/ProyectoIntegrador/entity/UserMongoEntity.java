@@ -1,14 +1,24 @@
-package com.example.ProyectoIntegrador.Dto;
+package com.example.ProyectoIntegrador.entity;
 
-public class UserDto {
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+
+@Document(collection = "users")
+public class UserMongoEntity {
+    @Id
     private String id;
     private String name;
     private String email;
 
-    public UserDto(String id, String name, String email) {
+    public UserMongoEntity(String id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
+    }
+    public UserMongoEntity() {
+
     }
 
     public String getId() {

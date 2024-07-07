@@ -1,45 +1,57 @@
 package com.example.ProyectoIntegrador.Service;
 
 import com.example.ProyectoIntegrador.Dto.UserDto;
+import com.example.ProyectoIntegrador.entity.UserMongoEntity;
+import com.example.ProyectoIntegrador.repository.UserMongoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import java.util.*;
 @Service
 public class UserServiceImpl implements UserService {
-    private Map<Long, UserDto> userMap = new HashMap<Long, UserDto>();
-    private Long id = 1L;
 
-    @Override
-    public UserDto createUser(UserDto userDto) {
-        userDto.setId(id);
-        userMap.put(userDto.getId(), userDto);
-        id++;
-        return userDto;
-    }
+    @Autowired
+    private UserMongoRepository userMongoRepository;
 
-    @Override
-    public UserDto getUserById(long id) {
-        return userMap.get(id);
-    }
-
-    @Override
     public List<UserDto> getAllUsers() {
-        return new ArrayList<UserDto>(userMap.values());
+        return this.userMongoRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    @Override
-    public UserDto updateUser(UserDto userDto, Long id){
-        if(userMap.containsKey(id)){
-            userDto.setId(id);
-            userMap.put(id, userDto);
-            return userDto;
-        }else{
-            return null;
-        }
+    public UserDto getUserById(String id) {
+        return this.userMongoRepository.findById(id)
+                .map(this::toDto)
+                .orElse(null);
     }
 
-    @Override
-    public void deleteUser(Long id) {
-        userMap.remove(id);
+    public UserDto createUser(UserDto user) {
+        UserMongoEntity entity = new UserMongoEntity();
+        entity.setName(user.getName());
+        entity.setEmail(user.getEmail());
+        UserMongoEntity Entitysaved = this.userMongoRepository.save(entity);
+        UserDto saved = this.toDto(Entitysaved);
+        return saved;
+    }
+
+    public UserDto updateUser (UserDto user, String id){
+        UserMongoEntity entity = this.userMongoRepository.findById(id)
+                .orElse(null);
+        entity.setEmail(user.getEmail());
+        entity.setName(user.getName());
+        UserMongoEntity Entitysaved = this.userMongoRepository.save(entity);
+        UserDto saved = this.toDto(Entitysaved);
+        return saved;
+    }
+
+    public void deleteUser(String id) {
+        UserMongoEntity entity = this.userMongoRepository.findById(id)
+                .orElse(null);
+        this.userMongoRepository.delete(entity);
+    }
+
+    private UserDto toDto(UserMongoEntity entity) {
+        return new UserDto(entity.getId(), entity.getName(), entity.getEmail());
     }
 }

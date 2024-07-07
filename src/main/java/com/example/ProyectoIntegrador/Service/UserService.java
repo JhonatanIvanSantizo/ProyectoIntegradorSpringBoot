@@ -6,8 +6,8 @@ import java.util.*;
 
 public interface UserService {
     UserDto createUser(UserDto userDto);
-    UserDto getUserById(long id);
+    UserDto getUserById(String id);
     List<UserDto> getAllUsers();
-    UserDto updateUser(UserDto userDto, Long id);
-    void deleteUser(Long id);
+    UserDto updateUser(UserDto userDto, String id);
+    void deleteUser(String id);
 }
