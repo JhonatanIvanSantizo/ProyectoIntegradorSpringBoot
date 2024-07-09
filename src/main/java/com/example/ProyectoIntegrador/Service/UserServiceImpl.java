@@ -38,6 +38,9 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser (UserDto user, String id){
         UserMongoEntity entity = this.userMongoRepository.findById(id)
                 .orElse(null);
+        if (entity == null) {
+            return null;  // o lanza una excepción personalizada si prefieres
+        }
         entity.setEmail(user.getEmail());
         entity.setName(user.getName());
         UserMongoEntity Entitysaved = this.userMongoRepository.save(entity);
@@ -46,9 +49,20 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
+        }
         UserMongoEntity entity = this.userMongoRepository.findById(id)
                 .orElse(null);
-        this.userMongoRepository.delete(entity);
+        if (entity != null) {
+            this.userMongoRepository.delete(entity);
+        }
+    }
+
+    public List<UserDto> findUsersByName(String name) {
+        return this.userMongoRepository.findByName(name).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     private UserDto toDto(UserMongoEntity entity) {
